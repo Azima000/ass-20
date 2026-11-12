@@ -1,21 +1,21 @@
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
 import type { SendMailOptions } from "nodemailer";
-import { env } from "process";
+import { env } from "../../configuration/env.service.js";
 
 const Transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: env.google_account_email,
-        pass: env.google_app_password
+        user: env.googleAccountEmail, // تأكدي إن الاسماء دي مطابقة لللي عندك في الـ env
+        pass: env.googleAppPassword
     }
 });
 
-
 export const Send_Email = async ({ to, subject, html }: SendMailOptions) => {
     const info = await Transporter.sendMail({
-        from: `Social media app ${env.google_account_email}`,
+        from: `Social media app <${env.googleAccountEmail}>`,
         to,
         subject,
         html
-    })
-}
+    });
+    return info;
+};

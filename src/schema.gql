@@ -1,0 +1,21 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type GetCategoryGqlDto {
+  _id: ID!
+  name: String!
+}
+
+type GetProductDto {
+  _id: ID!
+  name: String!
+  description: String!
+  categoryId: GetCategoryGqlDto!
+}
+
+type Query {
+  """welcome in gql Api"""
+  azima(email: String!, name: String!, password: String!): String!
+  sayHi(page: Int!, limit: Int!, size: Int!): [GetProductDto!]!
+}

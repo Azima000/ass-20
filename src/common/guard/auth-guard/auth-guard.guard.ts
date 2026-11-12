@@ -1,41 +1,26 @@
-
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException, } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
-
 import { env } from '../../../configuration/env.service.js';
 
-type AuthRequest = Request & {
-  user?: JwtPayload | string;
-};
+type AuthRequest = Request & { user?: JwtPayload | string; };
 
 @Injectable()
 export class AuthGuardGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const request =
-      context.switchToHttp().getRequest<AuthRequest>();
+    const request = context.switchToHttp().getRequest<AuthRequest>();
 
     const authorization = request.headers.authorization;
 
     if (!authorization) {
-      throw new UnauthorizedException(
-        'Authorization header is missing',
-      );
+      throw new UnauthorizedException('Authorization header is missing',);
     }
 
     const [flag, token, ...extra] = authorization.split(' ');
 
     if (flag !== 'Bearer' || !token || extra.length > 0) {
-      throw new UnauthorizedException(
-        'Invalid authorization format',
-      );
+      throw new UnauthorizedException('Invalid authorization format',);
     }
 
     try {
@@ -73,10 +58,8 @@ export class AuthGuardGuard implements CanActivate {
       }
 
       // 3. Verify the signature and token expiration
-      const decodedData = jwt.verify(
-        token,
-        signature,
-      ) as JwtPayload;
+      const decodedData = jwt.verify(token, signature,) as JwtPayload;
+
 
       console.log('3. Token verified successfully');
       console.log('4. Payload has id:', Boolean(decodedData.id));
@@ -91,16 +74,9 @@ export class AuthGuardGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      console.error(
-        'AUTH GUARD ERROR:',
-        error instanceof Error ? error.message : error,
-      );
+      console.error('AUTH GUARD ERROR:', error instanceof Error ? error.message : error,);
 
-      throw new UnauthorizedException(
-        error instanceof Error
-          ? error.message
-          : 'Invalid or expired token',
-      );
+      throw new UnauthorizedException(error instanceof Error ? error.message : 'Invalid or expired token',);
     }
   }
 }

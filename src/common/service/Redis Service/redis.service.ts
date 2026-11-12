@@ -6,20 +6,18 @@ import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class RedisService {
-
     private client: RedisClientType;
 
     constructor() {
-
         this.client = createClient({
             url: env.redisURL as string
         });
 
         this.handleConnection();
+        this.connect(); // 👈 ضفنا دي هنا عشان يتصل أوتوماتيك أول ما السيرفر يقوم
     }
 
     handleConnection() {
-
         this.client.on("error", (error) => {
             console.log("redis connection error", error);
         });
@@ -30,7 +28,9 @@ export class RedisService {
     }
 
     async connect() {
-        await this.client.connect();
+        if (!this.client.isOpen) { // تأكيد إن الاتصال مش مفتوح بالفعل
+            await this.client.connect();
+        }
     }
 
     async set({
@@ -42,26 +42,21 @@ export class RedisService {
         value: any;
         ttl?: number;
     }) {
-
         if (typeof value === "object") {
             value = JSON.stringify(value);
         }
 
         if (ttl) {
-
             return await this.client.set(
                 key,
                 value,
                 { EX: ttl }
             );
-
         } else {
-
             return await this.client.set(
                 key,
                 value
             );
-
         }
     }
 
@@ -119,22 +114,10 @@ export class RedisService {
             this.key(userId))
     }
 
-    // sRem  → يحذف عنصر من Set
-    // del   → يحذف الـ Key كله
-    // sCard → يعد العناصر
-    // sMembers → يجيب العناصر كلها
-    // sAdd → يضيف عنصر
-
-    createRevokeToken({
-        userId,
-        token
-    }: {
-        userId: any;
-        token: string;
-    }): string {
-
+    createRevokeToken({userId, token }: {  userId: any; token: string;}): string {
         return `revokeToken:${userId}:${token}`;
     }
+    GetCacheKey(url:string){
+        return `Request::${url}`
+    }
 }
-
-export const redis = new RedisService();

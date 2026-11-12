@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { AuthController } from "./auth.controller.js";
 import { TokenService } from "../../common/service/Token Service/token.service.js";
 import { AuthService } from "./auth.service.js";
-import { userModel } from "../../database/model/model.user.js";
+import { userModel } from "../../database/model/user.model.js";
 import { RedisService } from "../../common/service/Redis Service/redis.service.js";
 
 
@@ -14,6 +14,6 @@ import { RedisService } from "../../common/service/Redis Service/redis.service.j
     ],
 
     controllers: [AuthController],
-    providers : [AuthService,TokenService,RedisService],
+    providers: [AuthService, TokenService, RedisService],
 })
 export class AuthModule { }

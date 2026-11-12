@@ -3,18 +3,33 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { env } from "../../../configuration/env.service.js";
 import { BadRequestException, Injectable } from "@nestjs/common";
 
-
 @Injectable()
 export class TokenService {
+
     constructor() { }
 
     generateToken(user: any) {
+        console.log('TOKEN GENERATION STARTED');
+        console.log('USER KEYS:', Object.keys(user ?? {}));
+        console.log('USER DATA KEYS:', Object.keys(user?.userData ?? {}));
+        console.log('USER ID EXISTS:', Boolean(user?.userData?._id));
+        console.log('USER ROLE:', user?.userData?.role);
+        // Extract actual user data
+        const userData = user?.userData;
+
+        // Make sure user ID exists
+        if (!userData?._id) {
+            throw new BadRequestException(
+                "User ID is missing while generating token"
+            );
+        }
 
         let signature: string;
         let audience: string;
         let refreshSignature: string;
 
-        switch (user.role) {
+        // Determine token secrets based on user role
+        switch (userData.role) {
 
             case 0:
                 signature = env.jwtUserSecret;
@@ -29,8 +44,11 @@ export class TokenService {
                 break;
         }
 
+        // Generate Access Token
         const accessToken = jwt.sign(
-            { id: user._id },
+            {
+                id: userData._id.toString(),
+            },
             signature,
             {
                 audience,
@@ -38,8 +56,11 @@ export class TokenService {
             }
         );
 
+        // Generate Refresh Token
         const refreshToken = jwt.sign(
-            { id: user._id },
+            {
+                id: userData._id.toString(),
+            },
             refreshSignature,
             {
                 audience,
@@ -47,7 +68,10 @@ export class TokenService {
             }
         );
 
-        return { accessToken, refreshToken };
+        return {
+            accessToken,
+            refreshToken
+        };
     }
 
     decodeToken(token: string) {
@@ -75,11 +99,9 @@ export class TokenService {
         }
 
         try {
-
             return jwt.verify(token, signature);
 
         } catch {
-
             throw new BadRequestException("Token not valid");
         }
     }
@@ -109,11 +131,9 @@ export class TokenService {
         }
 
         try {
-
             return jwt.verify(refreshToken, signature);
 
         } catch {
-
             throw new BadRequestException("Refresh Token not valid");
         }
     }

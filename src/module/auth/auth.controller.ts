@@ -13,11 +13,11 @@ export class AuthController {
         private readonly authservice: AuthService,
     ) { }
 
-   
+
     @HttpCode(HttpStatus.OK)
-    @Get('/login')
-    login(@Body() body:any) {
-        let data= this.authservice.login(body);
+    @Post('/login')
+    login(@Body() body: any) {
+        let data = this.authservice.login(body);
         return data
     }
     ////////////////////////////////////////////////////////////////////////////
@@ -25,29 +25,27 @@ export class AuthController {
     @HttpCode(HttpStatus.CREATED)
     @Post('/register')
 
-    @UseInterceptors(
-        FileInterceptor('Image', {
-            dest: './Uploads',
-            fileFilter: (rea, file, callback) => {
-                if (!file.mimetype.match(/^Image\/(jpeg|png)$/)) {
-                    return callback(
-                        new UnsupportedMediaTypeException('only png and jpeg accepted'),
-                        false,
-                    );
-                }
-                callback(null, true)
-            },
-            limits: {
-
-                fieldSize: 5 * 1024 * 1024
+    @UseInterceptors(FileInterceptor('Image', {
+        dest: './Uploads', fileFilter: (rea, file, callback) => {
+            if (!file.mimetype.match(/^Image\/(jpeg|png)$/)) {
+                return callback(
+                    new UnsupportedMediaTypeException('only png and jpeg accepted'),
+                    false,
+                );
             }
-        }),
+            callback(null, true)
+        },
+        limits: {
+
+            fieldSize: 5 * 1024 * 1024
+        }
+    }),
     )
     singup(
         @UploadedFile() file: any,
         @Body(new CustomValidationPipe(registerSchema)) body: any,
     ) {
-        // console.log(file);
+        
 
         return this.authservice.signup(body);
     }
@@ -60,9 +58,11 @@ export class AuthController {
         return 'Authenticated successfully';
     }
     ////////////////////////////////////////////////////////////////////////////
-@Put('/verify')
+    @Post('/verify')
     async verify(@Body() body: any) {
-        let data = await this.authservice.verify(body);
-        return { message: "Success", data };
+        console.log('CONTROLLER RECEIVED:', body);
+
+        const data = await this.authservice.verify(body);
+        return { message: 'Success', data };
     }
 }
